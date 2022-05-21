@@ -14,7 +14,7 @@ class ApiException extends Equatable
 
   ApiResponse dataToApiResponse(responseData)
   {
-    ApiResponse apiResponse = const ApiResponse(Data: null, Errors: null);
+    ApiResponse apiResponse = const ApiResponse(data: null, message: '', status: 0);
 
     try
     {

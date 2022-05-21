@@ -1,26 +1,27 @@
-import 'package:flutter_fire_starter/src/models/api/api_error_model.dart';
-
 class ApiResponse
 {
-  final Object? Data;
-  final List<ApiError>? Errors;
+  final Object? data;
+  final int status;
+  final String message;
 
   const ApiResponse(
     {
-      required this.Data,
-      required this.Errors
+      required this.data,
+      required this.status,
+      required this.message,
     }
   );
 
   factory ApiResponse.fromJson(Map<String, dynamic> json)
   {
     final data = json['data'];
-    final errors = json['errors'] as List<dynamic>? ?? [];
-    final errorsList = errors.map((e) => ApiError.fromJson(e)).toList();
+    final status = json['status'];
+    final message = json['message'];
 
     return ApiResponse(
-      Data: data,
-      Errors: errorsList
+      data: data,
+      status: status,
+      message: message,
     );
   }
 }
