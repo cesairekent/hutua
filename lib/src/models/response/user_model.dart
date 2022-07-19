@@ -74,6 +74,7 @@ class UserModel extends BaseModel
     );
   }
 
+  @override
   Map<String, dynamic> toJson() => {
     'id': id,
     'createdAt': createdAt,
