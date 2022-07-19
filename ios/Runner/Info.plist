@@ -43,12 +43,8 @@
 		</array>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
-		<key>NSMotionUsageDescription</key>
-		<string>This application tracks your steps</string>
-		<key>UIBackgroundModes</key>
-		<array>
-			<string>processing</string>
-		</array>
+		<key>UIStatusBarHidden</key>
+		<false/>
 		<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 </dict>

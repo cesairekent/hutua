@@ -1,14 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_fire_starter/src/core/api_routes.dart';
+import 'package:flutter_fire_starter/src/core/app_configs/api_routes.dart';
+import 'package:flutter_fire_starter/src/core/app_configs/app_font_size.dart';
 import 'package:flutter_fire_starter/src/core/app_configs/app_keys.dart';
 import 'package:flutter_fire_starter/src/core/interceptors/api_exception.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AppInterceptors extends Interceptor {
+class Interceptors extends Interceptor {
   String token = '';
   String refreshToken = '';
   final ApiException exception = const ApiException();
@@ -24,13 +26,17 @@ class AppInterceptors extends Interceptor {
   @override
   void onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
-    print('REQUEST[${options.method}] => PATH: ${options.path}');
+    if (kDebugMode) {
+      print('REQUEST[${options.method}] => PATH: ${options.path}');
+    }
 
     try {
       final prefs = await SharedPreferences.getInstance();
       token = prefs.getString(AppKeys.token) ?? '';
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
     }
 
     if (token.isNotEmpty) {
@@ -56,13 +62,15 @@ class AppInterceptors extends Interceptor {
             .post(ApiRoutes.refreshToken,
                 data: jsonEncode({"refresh_token": refreshToken}))
             .then((value) async {
-          if (value.statusCode == 200 || value.statusCode == 201) {
+          if (value.statusCode == 201) {
             //get new tokens ...
-            print("access token" + token);
-            print("refresh token" + refreshToken);
+            if (kDebugMode) {
+              print("access token$token");
+              print("refresh token$refreshToken");
+            }
 
             //set bearer
-            err.requestOptions.headers["Authorization"] = "Bearer " + token;
+            err.requestOptions.headers["Authorization"] = "Bearer $token";
             //create request with new access token
             final opts = Options(
                 method: err.requestOptions.method,
@@ -75,33 +83,31 @@ class AppInterceptors extends Interceptor {
             return handler.resolve(cloneReq);
           }
           Fluttertoast.showToast(
-            msg: "Refresh Token Error",
-            toastLength: Toast.LENGTH_LONG,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 10,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 16.0,
-          );
+              msg: "Refresh Token Error",
+              toastLength: Toast.LENGTH_LONG,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 10,
+              backgroundColor: Colors.red,
+              textColor: Colors.white,
+              fontSize: AppFontSize.h6);
         });
         return _dio;
       } catch (err, st) {
         Fluttertoast.showToast(
-          msg: "Unknow Error",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.SNACKBAR,
-          timeInSecForIosWeb: 10,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
-        //BaseVM().hideLoading();
-        print(err);
-        print(st);
-        //return err;
+            msg: "Unknow Error",
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.SNACKBAR,
+            timeInSecForIosWeb: 10,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: AppFontSize.h6);
+        if (kDebugMode) {
+          print(err);
+          print(st);
+        }
+        return err;
       }
-    }
-    if (err.response?.statusCode == HttpStatus.internalServerError ||
+    } else if (err.response?.statusCode == HttpStatus.internalServerError ||
         err.response?.statusCode == HttpStatus.notImplemented ||
         err.response?.statusCode == HttpStatus.badGateway ||
         err.response?.statusCode == HttpStatus.serviceUnavailable ||
@@ -113,7 +119,7 @@ class AppInterceptors extends Interceptor {
         timeInSecForIosWeb: 50,
         backgroundColor: Colors.red,
         textColor: Colors.white,
-        fontSize: 16.0,
+        fontSize: AppFontSize.h6,
       );
     }
     return super.onError(err, handler);
